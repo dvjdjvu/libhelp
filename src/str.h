@@ -10,10 +10,10 @@ extern "C" {
 
 #define ITOA_BUF_SIZE   sizeof("-18446744073709551615")
 
-#define string(_s)      { sizeof(_s) - 1, _s }
-#define string_null     { 0, NULL }
-#define tolower(_c)     (_c >= 'A' && _c <= 'Z') ? (_c | 0x20) : _c
-#define toupper(_c)     (_c >= 'a' && _c <= 'z') ? (_c & ~0x20) : _c
+#define _string(_s)      { sizeof(_s) - 1, _s }
+#define _string_null     { 0, NULL }
+#define _tolower(_c)     (_c >= 'A' && _c <= 'Z') ? (_c | 0x20) : _c
+#define _toupper(_c)     (_c >= 'a' && _c <= 'z') ? (_c & ~0x20) : _c
 
 #define strcmp2(_off, _s, _d)   (_s[_off] == _d[0] && _s[_off + 1] == _d[1])
 #define strcmp3(_off, _s, _d)   (_s[_off] == _d[0] && _s[_off + 1] == _d[1] && _s[_off + 2] == _d[2])

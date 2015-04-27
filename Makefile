@@ -55,7 +55,7 @@ $(BUILD)/string.o: $(DEPS) \
 	
 $(BUILD)/libhelp.so: \
 	$(OBJSLIB)
-	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSLIB)
+	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSLIB) $(LDLIBS)
 
 clean:
 	rm -rf $(BUILD)

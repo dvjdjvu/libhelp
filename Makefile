@@ -2,7 +2,7 @@ CC = gcc
 LINK = $(CC)
 
 PATH_LIBS = /usr/local/lib
-PATH_HEAD = /usr/local/include/conf
+PATH_HEAD = /usr/local/include/help
 
 BIN_PREFIX = ""
 
@@ -32,9 +32,7 @@ OBJSLIB = $(BUILD)/config.o \
 
 BINS = $(BUILD)/libhelp.so 
 
-BINS2 = libconfig.so \
-	liblogger.so \
-	libproc.so \
+BINS2 = libhelp.so
 
 all: prebuild \
 	$(BINS)

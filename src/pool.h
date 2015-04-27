@@ -3,11 +3,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <str.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "str.h"
 #include "core.h"
 
 #ifdef	__cplusplus

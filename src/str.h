@@ -2,7 +2,6 @@
 #define COR_STRING_H
 
 #include "core.h"
-#include "pool.h"
 
 #ifdef	__cplusplus
 extern "C" {

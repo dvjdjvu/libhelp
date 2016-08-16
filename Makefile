@@ -24,11 +24,13 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/core.h \
 	$(SRC)/logger.h \
 	$(SRC)/pool.h \
-	$(SRC)/str.h 
+	$(SRC)/str.h \
+	$(SRC)/proc.h 
 
 OBJSLIB = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
-	    $(BUILD)/pool.o 
+	    $(BUILD)/pool.o \
+	    $(BUILD)/proc.o
 
 BINS = $(BUILD)/libhelp.so 
 
@@ -52,6 +54,10 @@ $(BUILD)/pool.o: $(DEPS) \
 $(BUILD)/string.o: $(DEPS) \
 	$(SRC)/string.c
 	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/string.o $(SRC)/string.c
+	
+$(BUILD)/proc.o: $(DEPS) \
+	$(SRC)/proc.c
+	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/proc.o $(SRC)/proc.c
 	
 $(BUILD)/libhelp.so: \
 	$(OBJSLIB)

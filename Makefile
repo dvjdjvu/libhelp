@@ -3,6 +3,7 @@ LINK = $(CC)
 
 PATH_LIBS = /usr/local/lib
 PATH_HEAD = /usr/local/include/help
+PATH_BIN = /usr/local/bin
 
 BIN_PREFIX = ""
 
@@ -30,11 +31,15 @@ DEPS = $(SRC)/config.h \
 OBJSLIB = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
 	    $(BUILD)/pool.o \
-	    $(BUILD)/proc.o
+	    $(BUILD)/proc.o 
 
-BINS = $(BUILD)/libhelp.so 
+OBJS =	  $(BUILD)/lockrun.o 
 
-BINS2 = libhelp.so
+BINS = $(BUILD)/libhelp.so \
+	$(BUILD)/lockrun 
+
+BINS2 = libhelp.so \
+	lockrun
 
 all: prebuild \
 	$(BINS)
@@ -63,6 +68,15 @@ $(BUILD)/libhelp.so: \
 	$(OBJSLIB)
 	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSLIB) $(LDLIBS)
 
+$(BUILD)/lockrun.o: $(DEPS) \
+	$(SRC)/lockrun.c
+	$(CC) -c $(CFLAGS) $(INCS) -o $(BUILD)/lockrun.o $(SRC)/lockrun.c
+
+$(BUILD)/lockrun: \
+	$(BUILD)/lockrun.o \
+	$(OBJS)
+	$(LINK) $(CFLAGS) -o $(BUILD)/lockrun $(LIBS) $(OBJS) $(LDLIBS)
+
 clean:
 	rm -rf $(BUILD)
 
@@ -76,6 +90,7 @@ install:
 	
 	cp -rf $(BUILD)/*.so $(PATH_LIBS)
 	cp -rf $(SRC)/*.h $(PATH_HEAD)
+	cp -rf $(SRC)/lockrun $(PATH_BIN)
 
 	@list='$(BINS2)'; for p in $$list; do \
 		echo "cp $(BUILD)/$$p $(PATH_BIN)/$$p"; \

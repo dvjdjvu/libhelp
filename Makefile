@@ -26,12 +26,15 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/logger.h \
 	$(SRC)/pool.h \
 	$(SRC)/str.h \
-	$(SRC)/proc.h 
+	$(SRC)/proc.h \
+	$(SRC)/file.h \
+	
 
 OBJSLIB = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
 	    $(BUILD)/pool.o \
-	    $(BUILD)/proc.o 
+	    $(BUILD)/proc.o \
+	    $(BUILD)/file.o
 
 OBJS =	  $(BUILD)/lockrun.o 
 
@@ -63,6 +66,10 @@ $(BUILD)/string.o: $(DEPS) \
 $(BUILD)/proc.o: $(DEPS) \
 	$(SRC)/proc.c
 	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/proc.o $(SRC)/proc.c
+	
+$(BUILD)/file.o: $(DEPS) \
+	$(SRC)/file.c
+	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/file.o $(SRC)/file.c
 	
 $(BUILD)/libhelp.so: \
 	$(OBJSLIB)

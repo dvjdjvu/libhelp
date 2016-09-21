@@ -58,7 +58,8 @@ memory_all(const char *dir) {
  * @param to   Куда скоприовать файл.
  * @return  0 - все хорошо, -1 - ошибка копирования.
  */
-int file_copy(const char *from, const char *to){
+int 
+file_copy(const char *from, const char *to) {
 	int fromfd = -1, tofd = -1;
 	ssize_t nread;
 	char buf[BUFSIZE];

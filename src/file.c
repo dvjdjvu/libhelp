@@ -51,3 +51,34 @@ memory_all(const char *dir) {
 		return 0;
 
 }
+
+/**
+ * @brief Функция блочного(по BUFSIZE байт) копирования файла from в файл to.
+ * @param from Копируемый файл.
+ * @param to   Куда скоприовать файл.
+ * @return  0 - все хорошо, -1 - ошибка копирования.
+ */
+int file_copy(const char *from, const char *to){
+	int fromfd = -1, tofd = -1;
+	ssize_t nread;
+	char buf[BUFSIZE];
+
+	chmod(from, 0755);
+
+	if((fromfd = open(from, O_RDONLY)) < 0) return -1;
+	//if((tofd   = open(to, O_WRONLY | O_CREAT | O_TRUNC | S_IRUSR | S_IWUSR), PERM_FILE) < 0) return -1;
+	if((tofd   = creat(to, PERM_FILE)) < 0) return -1;
+
+	while((nread = read(fromfd, buf, sizeof(buf))) > 0)
+		if(write(tofd, buf, nread) != nread){
+			chmod(to, 0755);
+			return -1;
+		}
+
+	chmod(to, 0755);
+
+	close(fromfd);
+	close(tofd);
+	
+	return 0;
+}

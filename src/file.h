@@ -31,6 +31,8 @@ extern "C" {
     
 double memory_free(const char *dir);
 double memory_all(const char *dir);
+
+int file_copy(const char *from, const char *to);
     
 #ifdef	__cplusplus
 }

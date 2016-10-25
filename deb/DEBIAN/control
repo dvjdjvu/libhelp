@@ -1,5 +1,5 @@
 Package: libhelp
-Version: 1.0.3
+Version: 1.0.4
 Section: libs
 Architecture: amd64
 Depends: libjudydebian1 (>= 1.0.5-1)

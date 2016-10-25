@@ -71,6 +71,20 @@ config_get_int(config_t *config, char *key, int def)
     return def;
 }
 
+int
+config_get_hex(config_t *config, char *key, int def)
+{
+    int         rc;
+    char        *k;
+    PWord_t     pw;
+    
+    JSLG(pw, config->data, (u_char *) key);
+    
+    k = (char *) *pw;
+    
+    return strtol(k, (char **)NULL, 16);
+}
+
 unsigned int
 config_get_uint(config_t *config, char *key, unsigned int def)
 {

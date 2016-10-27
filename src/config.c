@@ -82,6 +82,10 @@ config_get_hex(config_t *config, char *key, int def)
     
     k = (char *) *pw;
     
+    if (k == NULL) {
+        return def;
+    }
+    
     return strtol(k, (char **)NULL, 16);
 }
 

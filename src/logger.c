@@ -67,7 +67,7 @@ log_set_str_level(log_t *log, char *level)
 }
 
 void
-log_put(log_t *log, enum log_level_e level, const char *file, int line, const char *format, ...) 
+log_put(log_t *log, enum log_level_e level, const char *file, const char *_func, int line, const char *format, ...) 
 {
     int         ret;
     char        *p, *end;
@@ -79,7 +79,6 @@ log_put(log_t *log, enum log_level_e level, const char *file, int line, const ch
     if (log == NULL) {
         return;
     }
-    
     if (!log || log->level < level) {
         return;
     }
@@ -92,10 +91,10 @@ log_put(log_t *log, enum log_level_e level, const char *file, int line, const ch
             (tm.tm_year + 1900), (tm.tm_mon + 1), tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     }
     p = str;
-    end = p + LOG_STR_SIZE; 
-    if (file) {
-        ret = snprintf(p, LOG_STR_SIZE, "%s%s%s in %s:%d ",
-            log->ts_str, log_levels[level], log->pid_str, file, line);
+    end = p + LOG_STR_SIZE;
+    if (file && _func) {
+        ret = snprintf(p, LOG_STR_SIZE, "%s%s%s in %s:%s:%d ",
+            log->ts_str, log_levels[level], log->pid_str, file, _func, line);
         p += ret;
     } else {
         ret = snprintf(p, LOG_STR_SIZE, "%s%s%s ",

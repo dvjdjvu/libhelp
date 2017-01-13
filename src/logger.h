@@ -26,12 +26,12 @@ enum log_level_e
 #define LOG_PID_STR_SIZE    sizeof("-18446744073709551615")
 #define LOG_STR_SIZE        2048
 
-#define log_error(log, args...)         log_put(log, log_level_error,  __FILE__, __LINE__, __func__,  args)
-#define log_warn(log, args...)          log_put(log, log_level_warn,   __FILE__, __LINE__, __func__, args)
-#define log_notice(log, args...)        log_put(log, log_level_notice, __FILE__, __LINE__, __func__, args)
+#define log_error(log, args...)         { char func[strlen(__FUNCTION__)]; log_put(log, log_level_error,  __FILE__, strcpy((char *) (&func), __FUNCTION__), __LINE__, args); }
+#define log_warn(log, args...)          { char func[strlen(__FUNCTION__)]; log_put(log, log_level_warn,   __FILE__, strcpy((char *) (&func), __FUNCTION__), __LINE__, args); }
+#define log_notice(log, args...)        { char func[strlen(__FUNCTION__)]; log_put(log, log_level_notice, __FILE__, strcpy((char *) (&func), __FUNCTION__), __LINE__, args); }
 
 #ifdef DEBUG_ON
-    #define log_debug(log, args...)     log_put(log, log_level_debug, __FILE__, __LINE__, args)
+    #define log_debug(log, args...)     { char func[strlen(__FUNCTION__)]; log_put(log, log_level_debug, __FILE__, strcpy((char *) (&func), __FUNCTION__), __LINE__, args); }
 #else
     #define log_debug(log, args...)
 #endif
@@ -50,7 +50,7 @@ log_t      *log_new(const char *file, int level);
 void        log_rotate(log_t *log);
 void        log_set_pid(log_t *log, pid_t pid);
 void        log_set_str_level(log_t *log, char *level);
-void        log_put(log_t *log, enum log_level_e level, const char *file, int line, const char *format, ...);
+void        log_put(log_t *log, enum log_level_e level, const char *file, const char *_func, int line, const char *format, ...);
 void        log_delete(log_t *log);
 
 int         setproctitle_init(log_t *log, char **argv);

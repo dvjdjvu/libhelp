@@ -26,9 +26,9 @@ enum log_level_e
 #define LOG_PID_STR_SIZE    sizeof("-18446744073709551615")
 #define LOG_STR_SIZE        2048
 
-#define log_error(log, args...)         log_put(log, log_level_error,  __FILE__, __LINE__, args)
-#define log_warn(log, args...)          log_put(log, log_level_warn,   __FILE__, __LINE__, args)
-#define log_notice(log, args...)        log_put(log, log_level_notice, __FILE__, __LINE__, args)
+#define log_error(log, args...)         log_put(log, log_level_error,  __FILE__, __LINE__, __func__,  args)
+#define log_warn(log, args...)          log_put(log, log_level_warn,   __FILE__, __LINE__, __func__, args)
+#define log_notice(log, args...)        log_put(log, log_level_notice, __FILE__, __LINE__, __func__, args)
 
 #ifdef DEBUG_ON
     #define log_debug(log, args...)     log_put(log, log_level_debug, __FILE__, __LINE__, args)

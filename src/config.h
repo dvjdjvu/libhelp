@@ -17,9 +17,11 @@ struct config_s
     Pvoid_t     data;
     pool_t  *pool;
     log_t   *log;
+    
+    int line_error;
 };
 
-config_t       *config_new(log_t *log, char *file);
+config_t       *config_new(log_t *log, char *file, int *line_error);
 char           *config_get_str(config_t *config, char *key, char *def);
 int             config_get_int(config_t *config, char *key, int def);
 int             config_get_hex(config_t *config, char *key, int def);

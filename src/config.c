@@ -12,24 +12,30 @@
 static int config_load(config_t *config, char *file);
 
 config_t *
-config_new(log_t *log, char *file) {
+config_new(log_t *log, char *file, int *line_error) {
     config_t *config;
     pool_t *pool;
-
+    int ret;
+    
     pool = pool_new(CONFIG_POOL_SIZE, CONFIG_POOL_RMD_SIZE);
     if (!pool) {
-        log_error(log, "create pool error");
+        log_error(log, "log(): create pool error");
         return NULL;
     }
     config = pool_calloc(pool, sizeof (config_t));
     if (!config) {
-        log_error(log, "pool calloc error");
+        log_error(log, "log(): pool calloc error");
         pool_delete(pool);
         return NULL;
     }
     config->pool = pool;
     config->log = log;
-    if (config_load(config, file) != OK) {
+    config->line_error = 0;
+    
+    ret = config_load(config, file);
+    *line_error = config->line_error;
+    
+    if (ret != OK) {
         pool_delete(pool);
         return NULL;
     }
@@ -140,28 +146,30 @@ config_load(config_t *config, char *file) {
     static const u_char achar[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" "\0\0\0\0\0\0\0\0\0\0\0\0\0\0.\0" "0123456789\0\0\0\0\0\0" "\0ABCDEFGHIJKLMNOPQRSTUVWXYZ\0\0\0\0_\0abcdefghijklmnopqrstuvwxyz\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     PWord_t pw;
 
+    config->line_error = 0;
+    
     /*  открываем файл  */
     fd = open(file, O_RDONLY);
     if (fd < 0) {
-        log_error(config->log, "can't open %s", file);
+        log_error(config->log, "log(): can't open %s", file);
         return ERROR;
     }
     /*  получаем статистику файла  */
     if (fstat(fd, &sb) < 0) {
-        log_error(config->log, "can't stat %s", file);
+        log_error(config->log, "log(): can't stat %s", file);
         close(fd);
         return ERROR;
     }
     /*  читаем файл полностью в память  */
     src = (char *) malloc(sb.st_size + 1);
     if (!src) {
-        log_error(config->log, "can't malloc");
+        log_error(config->log, "log(): can't malloc");
         close(fd);
         return ERROR;
     }
     size = read(fd, src, sb.st_size);
     if (size != sb.st_size) {
-        log_error(config->log, "can't read file %s", file);
+        log_error(config->log, "log(): can't read file %s", file);
         free(src);
         close(fd);
         return ERROR;
@@ -199,8 +207,10 @@ config_load(config_t *config, char *file) {
                 } else if (c == '#') {
                     state = comment_s;
                 } else {
-                    log_error(config->log, "unexpected symbol %c (%d) in %d", c, c, line);
+                    log_error(config->log, "log(): unexpected symbol %c (%d) in %d", c, c, line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;
@@ -216,15 +226,19 @@ config_load(config_t *config, char *file) {
                 } else if (c == ' ' || c == '\t') {
                     *p = '\0';
                     if (p - pkey > CONFIG_KEY_MAX_SIZE) {
-                        log_error(config->log, "key %s to long (%d > %d) in %d", pkey, (int) (p - pkey), CONFIG_KEY_MAX_SIZE, line);
+                        log_error(config->log, "log(): key %s to long (%d > %d) in %d", pkey, (int) (p - pkey), CONFIG_KEY_MAX_SIZE, line);
                         free(src);
+                        
+                        config->line_error = line;
                         return ERROR;
                     }
                     state = param_key_sp_s;
                     break;
                 } else {
-                    log_error(config->log, "unexpected symbol %c (%d) in %d", c, c, line);
+                    log_error(config->log, "log(): unexpected symbol %c (%d) in %d", c, c, line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;
@@ -238,8 +252,10 @@ config_load(config_t *config, char *file) {
                     pvalue = p + 1;
                     state = param_copy_value_s;
                 } else if (c == '\r' || c == '\n') {
-                    log_error(config->log, "unexpected end of line in %d", line);
+                    log_error(config->log, "log(): unexpected end of line in %d", line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 } else {
                     pvalue = p;
@@ -252,20 +268,22 @@ config_load(config_t *config, char *file) {
                     /*  insert key->value  */
                     JSLI(pw, config->data, (u_char *) pkey);
                     if (pw == PJERR) {
-                        log_error(config->log, "Judy error");
+                        log_error(config->log, "log(): Judy error");
                         free(src);
                         return ERROR;
                     }
                     *pw = (Word_t) pool_cpy(config->pool, pvalue, p - pvalue + 1);
                     if (!*pw) {
-                        log_error(config->log, "pool_cpy error");
+                        log_error(config->log, "log(): pool_cpy error");
                         free(src);
                         return ERROR;
                     }
                     state = space_s;
                 } else if (c == '\n') {
-                    log_error(config->log, "unexpected end of line in %d", line);
+                    log_error(config->log, "log(): unexpected end of line in %d", line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;
@@ -277,20 +295,22 @@ config_load(config_t *config, char *file) {
                     /*  insert key->value  */
                     JSLI(pw, config->data, (u_char *) pkey);
                     if (pw == PJERR) {
-                        log_error(config->log, "Judy error");
+                        log_error(config->log, "log(): Judy error");
                         free(src);
                         return ERROR;
                     }
                     *pw = (Word_t) pool_cpy(config->pool, pvalue, p - pvalue + 1);
                     if (!*pw) {
-                        log_error(config->log, "pool_cpy error");
+                        log_error(config->log, "log(): pool_cpy error");
                         free(src);
                         return ERROR;
                     }
                     state = param_value_skip_s;
                 } else if (c == '\n') {
-                    log_error(config->log, "unexpected end of line in %d", line);
+                    log_error(config->log, "log(): unexpected end of line in %d", line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;
@@ -298,8 +318,10 @@ config_load(config_t *config, char *file) {
                 if (c == ';') {
                     state = space_s;
                 } else if (c == '\n') {
-                    log_error(config->log, "unexpected end of line in %d", line);
+                    log_error(config->log, "log(): unexpected end of line in %d", line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;
@@ -308,8 +330,10 @@ config_load(config_t *config, char *file) {
                     *p = '\0';
                     n = p - pvalue;
                     if (n > CONFIG_KEY_MAX_SIZE) {
-                        log_error(config->log, "copy key %s to long (%d > %d) in %d", pvalue, n, CONFIG_KEY_MAX_SIZE, line);
+                        log_error(config->log, "log(): copy key %s to long (%d > %d) in %d", pvalue, n, CONFIG_KEY_MAX_SIZE, line);
                         free(src);
+                        
+                        config->line_error = line;
                         return ERROR;
                     }
                     memcpy(index, pvalue, n + 1);
@@ -326,13 +350,13 @@ config_load(config_t *config, char *file) {
                         /*  insert key->value  */
                         JSLI(pw, config->data, (u_char *) key);
                         if (pw == PJERR) {
-                            log_error(config->log, "Judy error");
+                            log_error(config->log, "log(): Judy error");
                             free(src);
                             return ERROR;
                         }
                         *pw = (Word_t) pool_cpy(config->pool, k, strlen(k) + 1);
                         if (!*pw) {
-                            log_error(config->log, "pool_cpy error");
+                            log_error(config->log, "log(): pool_cpy error");
                             free(src);
                             return ERROR;
                         }
@@ -340,8 +364,10 @@ config_load(config_t *config, char *file) {
                     }
                     state = space_s;
                 } else if (c == '\n') {
-                    log_error(config->log, "unexpected end of line in %d", line);
+                    log_error(config->log, "log(): unexpected end of line in %d", line);
                     free(src);
+                    
+                    config->line_error = line;
                     return ERROR;
                 }
                 break;

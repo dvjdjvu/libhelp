@@ -13,7 +13,7 @@ SRC = ./src
 
 BUILD = ./objs
 
-CFLAGS      = -g3 -O3
+CFLAGS      = -g3 -O3 -lJudy
 PFLAGS      = -std=c++11
 CSAHREDLIBS = -shared
 
@@ -22,7 +22,7 @@ INCS = -I$(SRC) \
 
 LIBS = -L/usr/local/lib 
 
-LDLIBS = -pthread -W -Wall
+LDLIBS = -pthread -lJudy -W -Wall
 
 DEPS = $(SRC)/config.h \
 	$(SRC)/core.h \
@@ -30,19 +30,27 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/pool.h \
 	$(SRC)/str.h \
 	$(SRC)/proc.h \
-	$(SRC)/file.h \
-	$(SRC)/proc_msg.h 
-	
+	$(SRC)/file.h 
 
-OBJSLIB = $(BUILD)/config.o \
+DEPSPP = $(SRC)/proc_msg.h 
+
+OBJS = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
 	    $(BUILD)/pool.o \
 	    $(BUILD)/proc.o \
-	    $(BUILD)/file.o
+	    $(BUILD)/file.o \
+	    $(BUILD)/lockrun.o \
+	    $(BUILD)/proc_msg.pp.o
+	
+OBJSCC = $(BUILD)/config.o \
+	    $(BUILD)/logger.o \
+	    $(BUILD)/pool.o \
+	    $(BUILD)/proc.o \
+	    $(BUILD)/file.o 
+
+OBJSLOCK = $(BUILD)/lockrun.o
 	
 OBJSPP = $(BUILD)/proc_msg.pp.o
-
-OBJS =	  $(BUILD)/lockrun.o 
 
 BINS = $(BUILD)/libhelp.so \
 	$(BUILD)/lockrun \
@@ -50,7 +58,7 @@ BINS = $(BUILD)/libhelp.so \
 
 BINS2 = libhelp.so \
 	lockrun \
-	proc_msgpp.so
+	libhelppp.so
 
 all: prebuild \
 	$(BINS)
@@ -79,26 +87,28 @@ $(BUILD)/file.o: $(DEPS) \
 	$(SRC)/file.c
 	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/file.o $(SRC)/file.c
 	
+$(BUILD)/lockrun.o: $(DEPS) \
+	$(SRC)/lockrun.c
+	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/lockrun.o $(SRC)/lockrun.c
+	
 $(BUILD)/proc_msg.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg.cpp
 	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg.pp.o $(SRC)/proc_msg.cpp
 	
+	
+	
 $(BUILD)/libhelp.so: \
-	$(OBJSLIB)
-	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSLIB) $(LDLIBS)
+	$(OBJSCC)
+	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSCC) $(LDLIBS)
 
 $(BUILD)/libhelppp.so: \
-	$(OBJSLIB)
-	$(PP) $(CFLAGS) $(PFLAGS) $(CSAHREDLIBS) -o $(BUILD)/libhelppp.so $(OBJSLIB)
-
-$(BUILD)/lockrun.o: $(DEPS) \
-	$(SRC)/lockrun.c
-	$(CC) -c $(CFLAGS) $(INCS) -o $(BUILD)/lockrun.o $(SRC)/lockrun.c
+	$(OBJS)
+	$(PP) $(CFLAGS) $(PFLAGS) $(CSAHREDLIBS) -o $(BUILD)/libhelppp.so $(OBJSCC) $(OBJSPP) $(LDLIBS)
 
 $(BUILD)/lockrun: \
 	$(BUILD)/lockrun.o \
 	$(OBJS)
-	$(LINK) $(CFLAGS) -o $(BUILD)/lockrun $(LIBS) $(OBJS) $(LDLIBS)
+	$(LINK) $(CFLAGS) -o $(BUILD)/lockrun $(LIBS) $(OBJSLOCK) $(LDLIBS)
 
 clean:
 	rm -rf $(BUILD)

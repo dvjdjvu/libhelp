@@ -1,5 +1,7 @@
 CC = gcc
+PP = g++
 LINK = $(CC)
+LINKPP = $(PP)
 
 PATH_LIBS = /usr/local/lib
 PATH_HEAD = /usr/local/include/help
@@ -12,6 +14,7 @@ SRC = ./src
 BUILD = ./objs
 
 CFLAGS      = -g3 -O3
+PFLAGS      = -std=c++11
 CSAHREDLIBS = -shared
 
 INCS = -I$(SRC) \
@@ -19,7 +22,7 @@ INCS = -I$(SRC) \
 
 LIBS = -L/usr/local/lib 
 
-LDLIBS = -lJudy
+LDLIBS = -pthread -W -Wall
 
 DEPS = $(SRC)/config.h \
 	$(SRC)/core.h \
@@ -28,6 +31,7 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/str.h \
 	$(SRC)/proc.h \
 	$(SRC)/file.h \
+	$(SRC)/proc_msg.h 
 	
 
 OBJSLIB = $(BUILD)/config.o \
@@ -35,14 +39,18 @@ OBJSLIB = $(BUILD)/config.o \
 	    $(BUILD)/pool.o \
 	    $(BUILD)/proc.o \
 	    $(BUILD)/file.o
+	
+OBJSPP = $(BUILD)/proc_msg.pp.o
 
 OBJS =	  $(BUILD)/lockrun.o 
 
 BINS = $(BUILD)/libhelp.so \
-	$(BUILD)/lockrun 
+	$(BUILD)/lockrun \
+	$(BUILD)/libhelppp.so
 
 BINS2 = libhelp.so \
-	lockrun
+	lockrun \
+	proc_msgpp.so
 
 all: prebuild \
 	$(BINS)
@@ -71,9 +79,17 @@ $(BUILD)/file.o: $(DEPS) \
 	$(SRC)/file.c
 	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/file.o $(SRC)/file.c
 	
+$(BUILD)/proc_msg.pp.o: $(DEPS) $(DEPSPP) \
+	$(SRC)/proc_msg.cpp
+	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg.pp.o $(SRC)/proc_msg.cpp
+	
 $(BUILD)/libhelp.so: \
 	$(OBJSLIB)
 	$(CC) $(CSAHREDLIBS) -o $(BUILD)/libhelp.so $(OBJSLIB) $(LDLIBS)
+
+$(BUILD)/libhelppp.so: \
+	$(OBJSLIB)
+	$(PP) $(CFLAGS) $(PFLAGS) $(CSAHREDLIBS) -o $(BUILD)/libhelppp.so $(OBJSLIB)
 
 $(BUILD)/lockrun.o: $(DEPS) \
 	$(SRC)/lockrun.c

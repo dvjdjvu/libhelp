@@ -7,11 +7,6 @@
 
 #include "file.h"
 
-/**
- * @brief Возвращает колличество свободной памяти доступоной rootу в файловой системе в которой находится каталог dir.
- * @param dir - путь к диску
- * @return Кол-во свободной памяти в мегабайтах
- */
 double 
 memory_free(const char *dir) {
 
@@ -28,12 +23,6 @@ memory_free(const char *dir) {
 		return 0;
 
 }
-
-/**
- * @brief Возвращает колличество памяти доступоной rootу в файловой системе в которой находится каталог dir.
- * @param dir - путь к диску
- * @return Кол-во памяти в мегабайтах
- */
 
 double 
 memory_all(const char *dir) {
@@ -52,12 +41,6 @@ memory_all(const char *dir) {
 
 }
 
-/**
- * @brief Функция блочного(по BUFSIZE байт) копирования файла from в файл to.
- * @param from Копируемый файл.
- * @param to   Куда скоприовать файл.
- * @return  0 - все хорошо, -1 - ошибка копирования.
- */
 int 
 file_copy(const char *from, const char *to) {
 	int fromfd = -1, tofd = -1;

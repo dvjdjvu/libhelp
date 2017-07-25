@@ -29,9 +29,26 @@ extern "C" {
 #define BUFSIZE 512
 #define PERM_FILE (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
     
+/**
+ * @brief Возвращает колличество свободной памяти доступоной rootу в файловой системе в которой находится каталог dir.
+ * @param dir - путь к диску
+ * @return Кол-во свободной памяти в мегабайтах
+ */
 double memory_free(const char *dir);
+
+/**
+ * @brief Возвращает колличество памяти доступоной rootу в файловой системе в которой находится каталог dir.
+ * @param dir - путь к диску
+ * @return Кол-во памяти в мегабайтах
+ */
 double memory_all(const char *dir);
 
+/**
+ * @brief Функция блочного(по BUFSIZE байт) копирования файла from в файл to.
+ * @param from Копируемый файл.
+ * @param to   Куда скоприовать файл.
+ * @return  0 - все хорошо, -1 - ошибка копирования.
+ */
 int file_copy(const char *from, const char *to);
     
 #ifdef	__cplusplus

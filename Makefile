@@ -13,14 +13,15 @@ SRC = ./src
 
 BUILD = ./objs
 
-CFLAGS      = -g3 -O3 -lJudy
+CFLAGS      = -g3 -O3 -lJudy -lX11
 PFLAGS      = -std=c++11
 CSAHREDLIBS = -shared
 
 INCS = -I$(SRC) \
 	-I/usr/local/include
 
-LIBS = -L/usr/local/lib 
+LIBS = -L/usr/local/lib \
+	-L/usr/X11R6/lib
 
 LDLIBS = -pthread -lJudy -W -Wall
 

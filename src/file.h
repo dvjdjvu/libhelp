@@ -50,7 +50,13 @@ double memory_all(const char *dir);
  * @return  0 - все хорошо, -1 - ошибка копирования.
  */
 int file_copy(const char *from, const char *to);
-    
+
+/**
+ * @brief Проверяет, запущен ли xserver.
+ * @return 0 - Xserver запущен, -1 - Xserver не запущен.
+ */
+int xserver_is_start();
+
 #ifdef	__cplusplus
 }
 #endif

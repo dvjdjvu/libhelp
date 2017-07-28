@@ -52,7 +52,7 @@ double memory_all(const char *dir);
 int file_copy(const char *from, const char *to);
 
 /**
- * @brief Проверяет, запущен ли xserver.
+ * @brief Проверяет, запущен ли Xserver.
  * @return 0 - Xserver запущен, -1 - Xserver не запущен.
  */
 int xserver_is_start();

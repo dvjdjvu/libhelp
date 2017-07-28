@@ -84,6 +84,14 @@ public:
     int send(long type, char *msg, int msg_size);
     
     /**
+     * @brief Отправить сообщение.
+     * @param type тип сообщения сообщение (@ref QUEUE_DATA_JSON @ref QUEUE_DATA_STR)
+     * @param msg сообщение
+     * @return -1 при ошибке, иначе 0.
+     */
+    int send(long type, char *msg);
+    
+    /**
      * @brief Принять сообщение.
      * @param msg_type Тип сообщение (@ref QUEUE_DATA_JSON @ref QUEUE_DATA_STR @ref QUEUE_DATA_ARRAY)
      * @param msg_size возвращается размер полученого сообщения.

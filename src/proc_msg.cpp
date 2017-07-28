@@ -91,6 +91,10 @@ bool ProcMsg::queue_create(char *name, int proj_id) {
     return true;
 }
 
+int ProcMsg::send(long type, char *msg) {    
+    return this->send(type, msg, strlen(msg));
+}
+
 int ProcMsg::send(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 

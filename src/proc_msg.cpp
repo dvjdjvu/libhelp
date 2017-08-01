@@ -19,17 +19,16 @@ void ProcMsg::handler() {
     int size = 0;
     int type = 0;
     char *data = NULL;
-    
     while (1) {
         size = 0;
         type = 0;
         data = this->recv(&type, &size);
-        
         this->handler_parser(type, data, size);
     }
 }
 
-void ProcMsg::handler_start() {
+void ProcMsg::handler_start(long _msgtype_get) {
+    this->msgtype_get = _msgtype_get;
     this->thread_handler = thread(&ProcMsg::handler, this);
 }
 
@@ -43,7 +42,7 @@ void ProcMsg::handler_wait() {
 
 bool ProcMsg::queue_connect(char *name, int proj_id) {
 
-    this->name = name;
+    this->file_name = name;
     this->type = QUEUE_TYPE_CLIENT;
 
     // Generate the ipc key
@@ -63,7 +62,7 @@ bool ProcMsg::queue_connect(char *name, int proj_id) {
 
 bool ProcMsg::queue_create(char *name, int proj_id) {
 
-    this->name = name;
+    this->file_name = name;
     this->type = QUEUE_TYPE_SERVER;
 
     // Создаем файл ключа если он не существует.
@@ -98,6 +97,8 @@ int ProcMsg::send(long type, char *msg) {
 int ProcMsg::send(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
+    _pmsg.time_send = time(NULL);
+    
     _pmsg.type = type;
     memset(_pmsg.text, 0, QUEUE_MESSAGE_SIZE); // Заполняем строку нулями.
     if (msg_size <= QUEUE_MESSAGE_SIZE) {
@@ -110,12 +111,16 @@ int ProcMsg::send(long type, char *msg, int msg_size) {
 }
 
 char *ProcMsg::recv(int *msg_type, int *msg_size) {
-    int ret = msgrcv(this->mq_id, &this->pmsg, sizeof (this->pmsg.text), 0, 0);
+    int ret = msgrcv(this->mq_id, &this->pmsg, sizeof (this->pmsg.text), this->msgtype_get, 0);
 
     if (ret < 0) {
         return NULL;
     }
 
+    if (time(NULL) - this->pmsg.time_send > 1) {
+        return NULL;
+    }
+    
     *msg_size = ret;
     *msg_type = this->pmsg.type;
 
@@ -126,7 +131,8 @@ void ProcMsg::queue_close() {
     msgctl(this->mq_id, IPC_RMID, NULL);
 
     if (this->type == QUEUE_TYPE_SERVER) {
-        unlink(this->name.c_str());
+        unlink(this->file_name.c_str());
+        //unlink(this->file_name);
     }
 }
 
@@ -141,12 +147,12 @@ int main() {
 
     sleep(2);
     puts("handler_start");
-    Pmsg_c.handler_start();
+    Pmsg_c.handler_start(QUEUE_DATA_CLIENT_JSON);
     sleep(3);
 
 
     puts("send");
-    cout << Pmsg_s.send(QUEUE_DATA_STR, (char *) "Hello world", strlen((char *) "Hello world")) << endl;
+    cout << Pmsg_s.send(QUEUE_DATA_CLIENT_STR, (char *) "Hello world", strlen((char *) "Hello world")) << endl;
 
     puts("sleep 5");
     sleep(5);

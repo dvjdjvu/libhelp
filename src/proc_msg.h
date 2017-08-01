@@ -18,6 +18,7 @@
 #include <sys/ipc.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <thread>
 #include <mutex>
@@ -31,9 +32,13 @@ using namespace std;
 
 #define QUEUE_MESSAGE_SIZE 1024
 
-#define QUEUE_DATA_JSON     0x1000
-#define QUEUE_DATA_STR      0x1001
-#define QUEUE_DATA_ARRAY    0x1002
+#define QUEUE_DATA_SERVER_JSON     0x1000
+#define QUEUE_DATA_SERVER_STR      0x1001
+#define QUEUE_DATA_SERVER_ARRAY    0x1002
+
+#define QUEUE_DATA_CLIENT_JSON     0x2000
+#define QUEUE_DATA_CLIENT_STR      0x2001
+#define QUEUE_DATA_CLIENT_ARRAY    0x2002
 
 class ProcMsg {
 public:
@@ -43,11 +48,17 @@ public:
 
     struct proc_msg_s {
         long type; // Тип передаваемых данных.
+        time_t time_send;
         char text[QUEUE_MESSAGE_SIZE]; // Данные. 
     };
 
     proc_msg_s pmsg;
 
+    /**
+     * @brief Тип запрашиваемых сообщений.
+     */
+    long msgtype_get = 0;
+    
     /**
      * @brief Печать ошибки @ref errno
      */
@@ -107,7 +118,7 @@ public:
     /**
      * @brief Запуск обработчика входящих сообщений. Запускается в отдельном thred-е.
      */
-    void handler_start();
+    void handler_start(long _msgtype_get);
     
     /**
      * @brief Остановка обработчика входящих сообщений.
@@ -143,10 +154,11 @@ private:
     key_t ipckey;
     int mq_id;
     
-    string name;
+    std::string file_name;
+    //char *file_name;
     
     thread thread_handler;
-    mutex  mutex_read;;
+    mutex  mutex_read;
     
     /**
      * @brief Прием нового сообщения и запуск @ref.handler_parser

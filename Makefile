@@ -33,7 +33,9 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/proc.h \
 	$(SRC)/file.h 
 
-DEPSPP = $(SRC)/proc_msg.h 
+DEPSPP = $(SRC)/proc_msg.h \
+	    $(SRC)/proc_msg_udp.h \
+	    $(SRC)/proc_msg_queue.h
 
 OBJS = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
@@ -41,7 +43,9 @@ OBJS = $(BUILD)/config.o \
 	    $(BUILD)/proc.o \
 	    $(BUILD)/file.o \
 	    $(BUILD)/lockrun.o \
-	    $(BUILD)/proc_msg.pp.o
+	    $(BUILD)/proc_msg.pp.o \
+	    $(BUILD)/proc_msg_udp.pp.o \
+	    $(BUILD)/proc_msg_queue.pp.o
 	
 OBJSCC = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
@@ -51,7 +55,9 @@ OBJSCC = $(BUILD)/config.o \
 
 OBJSLOCK = $(BUILD)/lockrun.o
 	
-OBJSPP = $(BUILD)/proc_msg.pp.o
+OBJSPP = $(BUILD)/proc_msg.pp.o \
+	    $(BUILD)/proc_msg_udp.pp.o \
+	    $(BUILD)/proc_msg_queue.pp.o
 
 BINS = $(BUILD)/libhelp.so \
 	$(BUILD)/lockrun \
@@ -95,6 +101,14 @@ $(BUILD)/lockrun.o: $(DEPS) \
 $(BUILD)/proc_msg.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg.cpp
 	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg.pp.o $(SRC)/proc_msg.cpp
+	
+$(BUILD)/proc_msg_udp.pp.o: $(DEPS) $(DEPSPP) \
+	$(SRC)/proc_msg_udp.cpp
+	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_udp.pp.o $(SRC)/proc_msg_udp.cpp
+	
+$(BUILD)/proc_msg_queue.pp.o: $(DEPS) $(DEPSPP) \
+	$(SRC)/proc_msg_queue.cpp
+	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_queue.pp.o $(SRC)/proc_msg_queue.cpp
 	
 	
 	

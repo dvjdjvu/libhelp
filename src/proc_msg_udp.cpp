@@ -89,7 +89,13 @@ bool ProcMsgUDP::create(char *ip, int port) {
 }
 
 int ProcMsgUDP::send(long type, char *msg) {
-    return this->send(type, msg, strlen(msg));
+    int ret = this->send(type, msg, strlen(msg));
+    
+    printf("ret = %d \n", ret);
+    
+    return ret;
+    
+    //return this->send(type, msg, strlen(msg));
 }
 
 int ProcMsgUDP::send(long type, char *msg, int msg_size) {

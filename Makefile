@@ -13,7 +13,7 @@ SRC = ./src
 
 BUILD = ./objs
 
-CFLAGS      = -g3 -O3 -lJudy -lX11
+CFLAGS      = -g3 -O0 -lJudy -lX11
 PFLAGS      = -std=c++11
 CSAHREDLIBS = -shared
 
@@ -35,6 +35,7 @@ DEPS = $(SRC)/config.h \
 
 DEPSPP = $(SRC)/proc_msg.h \
 	    $(SRC)/proc_msg_udp.h \
+	    $(SRC)/proc_msg_tcp.h \
 	    $(SRC)/proc_msg_queue.h
 
 OBJS = $(BUILD)/config.o \
@@ -45,6 +46,7 @@ OBJS = $(BUILD)/config.o \
 	    $(BUILD)/lockrun.o \
 	    $(BUILD)/proc_msg.pp.o \
 	    $(BUILD)/proc_msg_udp.pp.o \
+	    $(BUILD)/proc_msg_tcp.pp.o \
 	    $(BUILD)/proc_msg_queue.pp.o
 	
 OBJSCC = $(BUILD)/config.o \
@@ -57,6 +59,7 @@ OBJSLOCK = $(BUILD)/lockrun.o
 	
 OBJSPP = $(BUILD)/proc_msg.pp.o \
 	    $(BUILD)/proc_msg_udp.pp.o \
+	    $(BUILD)/proc_msg_tcp.pp.o \
 	    $(BUILD)/proc_msg_queue.pp.o
 
 BINS = $(BUILD)/libhelp.so \
@@ -105,6 +108,10 @@ $(BUILD)/proc_msg.pp.o: $(DEPS) $(DEPSPP) \
 $(BUILD)/proc_msg_udp.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg_udp.cpp
 	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_udp.pp.o $(SRC)/proc_msg_udp.cpp
+
+$(BUILD)/proc_msg_tcp.pp.o: $(DEPS) $(DEPSPP) \
+	$(SRC)/proc_msg_tcp.cpp
+	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_tcp.pp.o $(SRC)/proc_msg_tcp.cpp
 	
 $(BUILD)/proc_msg_queue.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg_queue.cpp

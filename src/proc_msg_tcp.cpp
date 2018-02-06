@@ -9,7 +9,6 @@
 
 #include "proc_msg_tcp.h"
 
-
 ProcMsgTCP::ProcMsgTCP() {
 }
 
@@ -22,10 +21,10 @@ void ProcMsgTCP::handler() {
     int type = 0;
     char *data = NULL;
     while (1) {
-        
+
         if (this->type == PROC_MSG_TYPE_SERVER) {
             this->client_sd = accept(this->sd, NULL, NULL);
-            
+
             if (this->client_sd < 0) {
                 continue;
             }
@@ -39,11 +38,23 @@ void ProcMsgTCP::handler() {
                     puts("data == NULL");
                     break;
                 }
-                
+
                 this->handler_parser(type, data, size);
             }
-            
+
             ::close(this->client_sd);
+        } else {
+            while (1) {
+                size = 0;
+                type = 0;
+                data = this->recv(&type, &size);
+                if (data == NULL) {
+                    puts("data == NULL");
+                    break;
+                }
+
+                this->handler_parser(type, data, size);
+            }
         }
     }
 }
@@ -79,10 +90,10 @@ bool ProcMsgTCP::connect(char *ip, int port) {
         return false;
     }
 
-    if(::connect(this->sd, (struct sockaddr *) &this->master_isa, sizeof(this->master_isa)) < 0) {
+    if (::connect(this->sd, (struct sockaddr *) &this->master_isa, sizeof (this->master_isa)) < 0) {
         return false;
     }
-    
+
     return true;
 }
 
@@ -105,25 +116,25 @@ bool ProcMsgTCP::create(char *ip, int port) {
     }
 
     // Bind socket to address
-    if (bind(this->sd, (struct sockaddr *) &this->master_isa, sizeof(this->master_isa)) == -1) {
+    if (bind(this->sd, (struct sockaddr *) &this->master_isa, sizeof (this->master_isa)) == -1) {
         return false;
     }
-    
+
     // Start listing on the socket
     if (listen(this->sd, 1) == -1) {
         return false;
     }
-    
+
     return true;
 }
 
 int ProcMsgTCP::send(long type, char *msg) {
     int ret = this->send(type, msg, strlen(msg));
-    
+
     printf("ret = %d \n", ret);
-    
+
     return ret;
-    
+
     //return this->send(type, msg, strlen(msg));
 }
 
@@ -157,7 +168,7 @@ char *ProcMsgTCP::recv(int *msg_type, int *msg_size) {
     socklen_t addr_len = sizeof (this->slave_isa);
 
     if (this->type == PROC_MSG_TYPE_SERVER) {
-        ret = ::recv(this->client_sd, &this->pmsg, sizeof (this->pmsg), 0);  
+        ret = ::recv(this->client_sd, &this->pmsg, sizeof (this->pmsg), 0);
     } else {
         ret = ::recv(this->sd, &this->pmsg, sizeof (this->pmsg), 0);
     }
@@ -211,4 +222,4 @@ int main() {
 
     return 0;
 }
-*/
+ */

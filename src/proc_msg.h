@@ -56,6 +56,8 @@ using namespace std;
 class ProcMsg {
 public:
 
+    int conn_on = 0;
+    
     ProcMsg();
     ~ProcMsg();
 

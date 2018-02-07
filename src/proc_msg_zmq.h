@@ -23,6 +23,7 @@ public:
     ~ProcMsgZMQ();
     
     void handler();
+    void handler_start(int);
     void handler_start();
     void handler_stop();
     void handler_wait();
@@ -31,6 +32,7 @@ public:
     bool connect(char *addr);
     void close();
     
+    int send(long type, char *msg);
     int send(long type, char *msg, int msg_size);
     char *recv(int *msg_type, int *msg_size);
     

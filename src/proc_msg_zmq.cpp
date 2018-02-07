@@ -36,6 +36,10 @@ void ProcMsgZMQ::handler() {
     }
 }
 
+void ProcMsgZMQ::handler_start(int) {
+    this->handler_start();
+}
+
 void ProcMsgZMQ::handler_start() {
     this->thread_handler = thread(&ProcMsgZMQ::handler, this);
 }
@@ -103,6 +107,10 @@ bool ProcMsgZMQ::connect(char *addr) { // "tcp://127.0.0.1:5555"
 void ProcMsgZMQ::close() {
     zmq_close(this->responder);
     zmq_ctx_destroy(this->context);
+}
+
+int ProcMsgZMQ::send(long type, char *msg) {
+    return this->send(type, msg, strlen(msg));
 }
 
 int ProcMsgZMQ::send(long type, char *msg, int msg_size) {

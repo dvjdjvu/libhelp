@@ -129,13 +129,7 @@ bool ProcMsgTCP::create(char *ip, int port) {
 }
 
 int ProcMsgTCP::send(long type, char *msg) {
-    int ret = this->send(type, msg, strlen(msg));
-
-    printf("ret = %d \n", ret);
-
-    return ret;
-
-    //return this->send(type, msg, strlen(msg));
+    return this->send(type, msg, strlen(msg));
 }
 
 int ProcMsgTCP::send(long type, char *msg, int msg_size) {

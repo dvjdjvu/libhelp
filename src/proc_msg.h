@@ -63,6 +63,12 @@ public:
     void pm_perror(const char *s);
 
     /**
+     * @brief Установить тип связи.
+     * @param type "qeue", "zmq" или др.
+     */
+    void pm_init(char *comm_type);
+    
+    /**
      * @brief Подключается к очереди сообщений.
      * @param name
      * @param proj_id
@@ -141,6 +147,12 @@ public:
     }
     
 private:
+    
+    /**
+     * @brief Используемый тип связи (message qeue, zmq или др.).
+     */
+    std::string comm_type;
+    
     /**
      * @brief Передаваемое сообщение.
      */
@@ -166,6 +178,14 @@ private:
      * @brief Прием нового сообщения и запуск @ref.handler_parser
      */
     void pm_handler();
+    
+    
+    bool pm_connect_qeue(char *name, int proj_id);
+    bool pm_create_qeue(char *name, int proj_id);
+    int pm_send_qeue(long type, char *msg, int msg_size);
+    int pm_send_qeue(long type, char *msg);
+    char *pm_recv_qeue(int *msg_type, int *msg_size);
+    void pm_close_qeue();
     
 };
 

@@ -42,7 +42,7 @@ using namespace std;
 #define PM_DATA_CLIENT_STR      0x2001
 #define PM_DATA_CLIENT_ARRAY    0x2002
 
-#define PM_QEUE "qeue"
+#define PM_QUEUE "queue"
 #define PM_ZMQ  "zmq"
 
 class pm {
@@ -69,7 +69,7 @@ public:
 
     /**
      * @brief Установить тип связи.
-     * @param type @ref PM_ZMQ, @ref PM_QEUE или др.
+     * @param type @ref PM_ZMQ, @ref PM_QUEUE или др.
      * @return true или false
      */
     bool pm_init(char *comm_type);
@@ -169,7 +169,7 @@ public:
 private:
     
     /**
-     * @brief Используемый тип связи (message qeue, zmq или др.).
+     * @brief Используемый тип связи (message queue, zmq или др.).
      */
     std::string comm_type;
     
@@ -199,13 +199,13 @@ private:
      */
     void pm_handler();
     
-    // qeue
-    bool pm_connect_qeue(char *name, int proj_id);
-    bool pm_create_qeue(char *name, int proj_id);
-    int pm_send_qeue(long type, char *msg, int msg_size);
-    int pm_send_qeue(long type, char *msg);
-    char *pm_recv_qeue(int *msg_type, int *msg_size);
-    void pm_close_qeue();
+    // queue
+    bool pm_connect_queue(char *name, int proj_id);
+    bool pm_create_queue(char *name, int proj_id);
+    int pm_send_queue(long type, char *msg, int msg_size);
+    int pm_send_queue(long type, char *msg);
+    char *pm_recv_queue(int *msg_type, int *msg_size);
+    void pm_close_queue();
     
     // zmq
     void *zmq_context;

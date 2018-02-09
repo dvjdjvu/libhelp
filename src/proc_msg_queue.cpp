@@ -1,6 +1,6 @@
 #include "proc_msg.h"
 
-bool pm::pm_connect_qeue(char *name, int proj_id) {
+bool pm::pm_connect_queue(char *name, int proj_id) {
 
     this->file_name = name;
     this->type = PM_TYPE_CLIENT;
@@ -20,7 +20,7 @@ bool pm::pm_connect_qeue(char *name, int proj_id) {
     return true;
 }
 
-bool pm::pm_create_qeue(char *name, int proj_id) {
+bool pm::pm_create_queue(char *name, int proj_id) {
 
     this->file_name = name;
     this->type = PM_TYPE_SERVER;
@@ -50,7 +50,7 @@ bool pm::pm_create_qeue(char *name, int proj_id) {
     return true;
 }
 
-void pm::pm_close_qeue() {
+void pm::pm_close_queue() {
     msgctl(this->mq_id, IPC_RMID, NULL);
 
     if (this->type == PM_TYPE_SERVER) {
@@ -59,11 +59,11 @@ void pm::pm_close_qeue() {
     }
 }
 
-int pm::pm_send_qeue(long type, char *msg) {    
-    return this->pm_send(type, msg, strlen(msg));
+int pm::pm_send_queue(long type, char *msg) {    
+    return this->pm_send_queue(type, msg, strlen(msg));
 }
 
-int pm::pm_send_qeue(long type, char *msg, int msg_size) {
+int pm::pm_send_queue(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
     _pmsg.time_send = time(NULL);
@@ -79,7 +79,7 @@ int pm::pm_send_qeue(long type, char *msg, int msg_size) {
     return msgsnd(this->mq_id, &_pmsg, sizeof (_pmsg.text), 0);
 }
 
-char *pm::pm_recv_qeue(int *msg_type, int *msg_size) {
+char *pm::pm_recv_queue(int *msg_type, int *msg_size) {
     int ret = msgrcv(this->mq_id, &this->pmsg, sizeof (this->pmsg.text), this->msgtype_get, 0);
 
     if (ret < 0) {

@@ -15,7 +15,7 @@
 
 #include "proc_msg.h"
 
-bool pm::create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
+bool pm::pm_create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
     do {
         this->zmq_context = zmq_ctx_new();
         if (this->zmq_context == NULL) {
@@ -30,18 +30,14 @@ bool pm::create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
         if (zmq_bind(this->zmq_responder, addr) != 0) {
             break;
         }
-
-        this->conn_on = 1;
         
         return true;
     } while (0);
-
-    this->conn_on = 0;
     
     return false;
 }
 
-bool pm::connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
+bool pm::pm_connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
     do {
         this->zmq_context = zmq_ctx_new();
         if (this->zmq_context == NULL) {
@@ -56,27 +52,23 @@ bool pm::connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
         if (zmq_connect(this->zmq_responder, addr) != 0) {
             break;
         }
-
-        this->conn_on = 1;
         
         return true;
     } while (0);
-
-    this->conn_on = 0;
     
     return false;
 }
 
-void pm::close_zmq() {
+void pm::pm_close_zmq() {
     zmq_close(this->zmq_responder);
     zmq_ctx_destroy(this->zmq_context);
 }
 
-int pm::send_zmq(long type, char *msg) {
-    return this->send(type, msg, strlen(msg));
+int pm::pm_send_zmq(long type, char *msg) {
+    return this->pm_send_zmq(type, msg, strlen(msg));
 }
 
-int pm::send_zmq(long type, char *msg, int msg_size) {
+int pm::pm_send_zmq(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
     _pmsg.type = type;
@@ -90,7 +82,7 @@ int pm::send_zmq(long type, char *msg, int msg_size) {
     return zmq_send(this->zmq_responder, &_pmsg, sizeof (_pmsg), 0);
 }
 
-char *pm::recv_zmq(int *msg_type, int *msg_size) {
+char *pm::pm_recv_zmq(int *msg_type, int *msg_size) {
     int ret = zmq_recv(this->zmq_responder, &this->pmsg, sizeof (this->pmsg), 0);
     if (ret < 0) {
         return NULL;

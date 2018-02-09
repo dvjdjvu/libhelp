@@ -43,7 +43,7 @@ void pm::pm_handler_wait() {
 bool pm::pm_init(char *comm_type) {
     this->comm_type = comm_type;
     
-    if (this->comm_type != PM_QEUE || this->comm_type != PM_ZMQ) {
+    if (this->comm_type != PM_QUEUE || this->comm_type != PM_ZMQ) {
         return false;
     }
     
@@ -57,8 +57,8 @@ bool pm::pm_connect(char *addr) {
 }
 
 bool pm::pm_connect(char *name, int proj_id) {
-    if (this->comm_type == PM_QEUE) {
-        return this->pm_connect_qeue(name, proj_id);
+    if (this->comm_type == PM_QUEUE) {
+        return this->pm_connect_queue(name, proj_id);
     }
     
     return false;
@@ -73,16 +73,16 @@ bool pm::pm_create(char *addr) {
 }
 
 bool pm::pm_create(char *name, int proj_id) {
-    if (this->comm_type == PM_QEUE) {
-        return this->pm_create_qeue(name, proj_id);
+    if (this->comm_type == PM_QUEUE) {
+        return this->pm_create_queue(name, proj_id);
     }
     
     return false;
 }
 
 void pm::pm_close() {
-    if (this->comm_type == PM_QEUE) {
-        this->pm_close_qeue();
+    if (this->comm_type == PM_QUEUE) {
+        this->pm_close_queue();
     } else if (this->comm_type == PM_ZMQ) {
         this->pm_close_zmq();
     }
@@ -95,8 +95,8 @@ int pm::pm_send(long type, char *msg) {
 }
 
 int pm::pm_send(long type, char *msg, int msg_size) {
-    if (this->comm_type == PM_QEUE) {
-        return this->pm_send_qeue(type, msg, msg_size);
+    if (this->comm_type == PM_QUEUE) {
+        return this->pm_send_queue(type, msg, msg_size);
     } else if (this->comm_type == PM_ZMQ) {
         return this->pm_send_zmq(type, msg, msg_size);
     }
@@ -105,8 +105,8 @@ int pm::pm_send(long type, char *msg, int msg_size) {
 }
 
 char *pm::pm_recv(int *msg_type, int *msg_size) {
-    if (this->comm_type == PM_QEUE) {
-        return pm_recv_qeue(msg_type, msg_size);
+    if (this->comm_type == PM_QUEUE) {
+        return pm_recv_queue(msg_type, msg_size);
     } else if (this->comm_type == PM_ZMQ) {
         return pm_recv_zmq(msg_type, msg_size);
     }

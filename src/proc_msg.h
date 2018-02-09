@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <zmq.h>
+
 #include <thread>
 #include <mutex>
 
@@ -39,6 +41,9 @@ using namespace std;
 #define PM_DATA_CLIENT_JSON     0x2000
 #define PM_DATA_CLIENT_STR      0x2001
 #define PM_DATA_CLIENT_ARRAY    0x2002
+
+#define PM_QEUE "qeue"
+#define PM_ZMQ  "zmq"
 
 class pm {
 public:
@@ -64,9 +69,17 @@ public:
 
     /**
      * @brief Установить тип связи.
-     * @param type "qeue", "zmq" или др.
+     * @param type @ref PM_ZMQ, @ref PM_QEUE или др.
+     * @return true или false
      */
-    void pm_init(char *comm_type);
+    bool pm_init(char *comm_type);
+    
+    /**
+     * @brief Подключается к очереди сообщений.
+     * @param addr
+     * @return true если очередь создана, иначе false
+     */
+    bool pm_connect(char *addr);
     
     /**
      * @brief Подключается к очереди сообщений.
@@ -75,6 +88,13 @@ public:
      * @return true если очередь создана, иначе false
      */
     bool pm_connect(char *name, int proj_id);
+    
+    /**
+     * @brief Создает очередь сообщений.
+     * @param addr
+     * @return true если очередь создана, иначе false
+     */
+    bool pm_create(char *addr);
     
     /**
      * @brief Создает очередь сообщений.
@@ -179,13 +199,25 @@ private:
      */
     void pm_handler();
     
-    
+    // qeue
     bool pm_connect_qeue(char *name, int proj_id);
     bool pm_create_qeue(char *name, int proj_id);
     int pm_send_qeue(long type, char *msg, int msg_size);
     int pm_send_qeue(long type, char *msg);
     char *pm_recv_qeue(int *msg_type, int *msg_size);
     void pm_close_qeue();
+    
+    // zmq
+    void *zmq_context;
+    void *zmq_responder;
+    
+    bool pm_connect_zmq(char *addr);
+    bool pm_create_zmq(char *addr);
+    int pm_send_zmq(long type, char *msg, int msg_size);
+    int pm_send_zmq(long type, char *msg);
+    char *pm_recv_zmq(int *msg_type, int *msg_size);
+    void pm_close_zmq();
+    
     
 };
 

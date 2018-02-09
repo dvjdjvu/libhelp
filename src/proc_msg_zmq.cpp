@@ -13,58 +13,21 @@
  * g++ proc_msg.cpp proc_msg_zmq.cpp -pthread -std=c++11 -lzmq
  */
 
-#include "proc_msg_zmq.h"
+#include "proc_msg.h"
 
-ProcMsgZMQ::ProcMsgZMQ() {
-
-}
-
-ProcMsgZMQ::~ProcMsgZMQ() {
-
-}
-
-void ProcMsgZMQ::handler() {
-    int size = 0;
-    int type = 0;
-    char *data = NULL;
-    while (1) {
-        size = 0;
-        type = 0;
-        data = this->recv(&type, &size);
-        this->handler_parser(type, data, size);
-        usleep(200);
-    }
-}
-
-void ProcMsgZMQ::handler_start(int) {
-    this->handler_start();
-}
-
-void ProcMsgZMQ::handler_start() {
-    this->thread_handler = thread(&ProcMsgZMQ::handler, this);
-}
-
-void ProcMsgZMQ::handler_stop() {
-    this->thread_handler.detach();
-}
-
-void ProcMsgZMQ::handler_wait() {
-    this->thread_handler.join();
-}
-
-bool ProcMsgZMQ::create(char *addr) { // "tcp://127.0.0.1:5555"
+bool pm::create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
     do {
-        this->context = zmq_ctx_new();
-        if (this->context == NULL) {
+        this->zmq_context = zmq_ctx_new();
+        if (this->zmq_context == NULL) {
             break;
         }
 
-        this->responder = zmq_socket(this->context, ZMQ_PULL);
-        if (this->responder == NULL) {
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_PULL);
+        if (this->zmq_responder == NULL) {
             break;
         }
 
-        if (zmq_bind(this->responder, addr) != 0) {
+        if (zmq_bind(this->zmq_responder, addr) != 0) {
             break;
         }
 
@@ -78,19 +41,19 @@ bool ProcMsgZMQ::create(char *addr) { // "tcp://127.0.0.1:5555"
     return false;
 }
 
-bool ProcMsgZMQ::connect(char *addr) { // "tcp://127.0.0.1:5555"
+bool pm::connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
     do {
-        this->context = zmq_ctx_new();
-        if (this->context == NULL) {
+        this->zmq_context = zmq_ctx_new();
+        if (this->zmq_context == NULL) {
             break;
         }
 
-        this->responder = zmq_socket(this->context, ZMQ_PUSH);
-        if (this->responder == NULL) {
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_PUSH);
+        if (this->zmq_responder == NULL) {
             break;
         }
 
-        if (zmq_connect(this->responder, addr) != 0) {
+        if (zmq_connect(this->zmq_responder, addr) != 0) {
             break;
         }
 
@@ -104,31 +67,31 @@ bool ProcMsgZMQ::connect(char *addr) { // "tcp://127.0.0.1:5555"
     return false;
 }
 
-void ProcMsgZMQ::close() {
-    zmq_close(this->responder);
-    zmq_ctx_destroy(this->context);
+void pm::close_zmq() {
+    zmq_close(this->zmq_responder);
+    zmq_ctx_destroy(this->zmq_context);
 }
 
-int ProcMsgZMQ::send(long type, char *msg) {
+int pm::send_zmq(long type, char *msg) {
     return this->send(type, msg, strlen(msg));
 }
 
-int ProcMsgZMQ::send(long type, char *msg, int msg_size) {
+int pm::send_zmq(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
     _pmsg.type = type;
-    memset(_pmsg.text, 0, PROC_MSG_MESSAGE_SIZE); // Заполняем строку нулями.
-    if (msg_size <= PROC_MSG_MESSAGE_SIZE) {
+    memset(_pmsg.text, 0, PM_MESSAGE_SIZE); // Заполняем строку нулями.
+    if (msg_size <= PM_MESSAGE_SIZE) {
         strncpy(_pmsg.text, msg, msg_size);
     } else {
-        strncpy(_pmsg.text, msg, PROC_MSG_MESSAGE_SIZE);
+        strncpy(_pmsg.text, msg, PM_MESSAGE_SIZE);
     }
     
-    return zmq_send(this->responder, &_pmsg, sizeof (_pmsg), 0);
+    return zmq_send(this->zmq_responder, &_pmsg, sizeof (_pmsg), 0);
 }
 
-char *ProcMsgZMQ::recv(int *msg_type, int *msg_size) {
-    int ret = zmq_recv(this->responder, &this->pmsg, sizeof (this->pmsg), 0);
+char *pm::recv_zmq(int *msg_type, int *msg_size) {
+    int ret = zmq_recv(this->zmq_responder, &this->pmsg, sizeof (this->pmsg), 0);
     if (ret < 0) {
         return NULL;
     }
@@ -142,33 +105,3 @@ char *ProcMsgZMQ::recv(int *msg_type, int *msg_size) {
 
     return &this->pmsg.text[0];
 }
-
-/*
-int main() {
-
-    ProcMsgZMQ Pmsg_s;
-    ProcMsgZMQ Pmsg_c;
-
-    cout << "create  " << Pmsg_s.create((char *) "tcp://127.0.0.1:5555") << endl;
-    puts("handler_start");
-    Pmsg_s.handler_start();
-    
-    
-    cout << "connect " << Pmsg_c.connect((char *) "tcp://127.0.0.1:5556") << endl;
-
-    sleep(3);
-
-    cout << "send: " << Pmsg_c.send(PROC_MSG_DATA_CLIENT_STR, (char *) "Hello world22", strlen((char *) "Hello world22")) << endl;
-    
-    cout << "send: " << Pmsg_c.send(PROC_MSG_DATA_CLIENT_STR, (char *) "Hello world", strlen((char *) "Hello world")) << endl;
-    
-    puts("sleep 5");
-    sleep(5);
-
-    cout << "send: " << Pmsg_c.send(PROC_MSG_DATA_CLIENT_STR, (char *) "Hello world22", strlen((char *) "Hello world22")) << endl;
-    
-    Pmsg_s.handler_wait();
-
-    return 0;
-}
-*/

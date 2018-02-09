@@ -22,7 +22,7 @@ bool pm::pm_create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
             break;
         }
 
-        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_PULL);
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_REP);
         if (this->zmq_responder == NULL) {
             break;
         }
@@ -44,7 +44,7 @@ bool pm::pm_connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
             break;
         }
 
-        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_PUSH);
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_REQ);
         if (this->zmq_responder == NULL) {
             break;
         }

@@ -106,9 +106,9 @@ int pm::pm_send(long type, char *msg, int msg_size) {
 
 char *pm::pm_recv(int *msg_type, int *msg_size) {
     if (this->comm_type == PM_QUEUE) {
-        return pm_recv_queue(msg_type, msg_size);
+        return this->pm_recv_queue(msg_type, msg_size);
     } else if (this->comm_type == PM_ZMQ) {
-        return pm_recv_zmq(msg_type, msg_size);
+        return this->pm_recv_zmq(msg_type, msg_size);
     }
     
     return NULL;

@@ -18,6 +18,7 @@ struct config_s
     pool_t  *pool;
     log_t   *log;
     
+    char *src;
     int line_error;
 };
 
@@ -28,6 +29,7 @@ int             config_get_hex(config_t *config, char *key, int def);
 unsigned int    config_get_uint(config_t *config, char *key, unsigned int def);
 int             config_get_bool(config_t *config, char *key, int def);
 void            config_delete(config_t *config);
+char           *config_get_file(config_t *config);
 
 #ifdef	__cplusplus
 }

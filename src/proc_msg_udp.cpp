@@ -5,45 +5,11 @@
  * Created on 31 января 2018 г., 18:00
  */
 
-#include "proc_msg_udp.h"
+#include "proc_msg.h"
 
-ProcMsgUDP::ProcMsgUDP() {
-}
+bool pm::pm_connect_udp(char *ip, int port) {
 
-ProcMsgUDP::~ProcMsgUDP() {
-
-}
-
-void ProcMsgUDP::handler() {
-
-    int size = 0;
-    int type = 0;
-    char *data = NULL;
-    while (1) {
-        size = 0;
-        type = 0;
-        data = this->recv(&type, &size);
-        this->handler_parser(type, data, size);
-        //usleep(200);
-    }
-}
-
-void ProcMsgUDP::handler_start(long _msgtype_get) {
-    this->msgtype_get = _msgtype_get;
-    this->thread_handler = thread(&ProcMsgUDP::handler, this);
-}
-
-void ProcMsgUDP::handler_stop() {
-    this->thread_handler.detach();
-}
-
-void ProcMsgUDP::handler_wait() {
-    this->thread_handler.join();
-}
-
-bool ProcMsgUDP::connect(char *ip, int port) {
-
-    this->type = PROC_MSG_TYPE_CLIENT;
+    this->type = PM_TYPE_CLIENT;
 
     // Создаем сокет.
     this->sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -51,20 +17,28 @@ bool ProcMsgUDP::connect(char *ip, int port) {
         return false;
     }
 
-    memset((char *) &this->master_isa, 0, sizeof (this->master_isa));
+    memset((char *) &this->server_isa, 0, sizeof (this->server_isa));
 
-    this->master_isa.sin_family = AF_INET;
-    this->master_isa.sin_port = htons(port);
-    if (inet_aton(ip, &this->master_isa.sin_addr) == 0) {
+    this->server_isa.sin_family = AF_INET;
+    this->server_isa.sin_port = htons(port);
+    if (inet_aton(ip, &this->server_isa.sin_addr) == 0) {
         return false;
     }
 
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+    //if (setsockopt(this->sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    //    perror("Error");
+    //    return false;
+    //}
+    
     return true;
 }
 
-bool ProcMsgUDP::create(char *ip, int port) {
+bool pm::pm_create_udp(char *ip, int port) {
 
-    this->type = PROC_MSG_TYPE_SERVER;
+    this->type = PM_TYPE_SERVER;
 
     // Создаем сокет.
     this->sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -72,41 +46,44 @@ bool ProcMsgUDP::create(char *ip, int port) {
         return false;
     }
 
-    memset((char *) &this->master_isa, 0, sizeof (this->master_isa));
+    memset((char *) &this->server_isa, 0, sizeof (this->server_isa));
 
-    this->master_isa.sin_family = AF_INET;
-    this->master_isa.sin_port = htons(port);
-    if (inet_aton(ip, &this->master_isa.sin_addr) == 0) {
+    this->server_isa.sin_family = AF_INET;
+    this->server_isa.sin_port = htons(port);
+    if (inet_aton(ip, &this->server_isa.sin_addr) == 0) {
         return false;
     }
 
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
+    //if (setsockopt(this->sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    //    return false;
+    //}
+    
     //bind socket to port
-    if (bind(this->sd, (struct sockaddr*) &this->master_isa, sizeof (this->master_isa)) == -1) {
+    if (bind(this->sd, (struct sockaddr*) &this->server_isa, sizeof (this->server_isa)) == -1) {
         return false;
     }
 
     return true;
 }
 
-int ProcMsgUDP::send(long type, char *msg) {
-    int ret = this->send(type, msg, strlen(msg));
-    
-    printf("ret = %d \n", ret);
-    
-    return ret;
-    
-    //return this->send(type, msg, strlen(msg));
+int pm::pm_send_udp(long type, char *msg) {
+    return this->pm_send_udp(type, msg, strlen(msg));
 }
 
-int ProcMsgUDP::send(long type, char *msg, int msg_size) {
+int pm::pm_send_udp(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
+    _pmsg.time_send = time(NULL);
+    
     _pmsg.type = type;
-    memset(_pmsg.text, 0, PROC_MSG_MESSAGE_SIZE); // Заполняем строку нулями.
-    if (msg_size <= PROC_MSG_MESSAGE_SIZE) {
+    memset(_pmsg.text, 0, PM_MESSAGE_SIZE); // Заполняем строку нулями.
+    if (msg_size <= PM_MESSAGE_SIZE) {
         strncpy(_pmsg.text, msg, msg_size);
     } else {
-        strncpy(_pmsg.text, msg, PROC_MSG_MESSAGE_SIZE);
+        strncpy(_pmsg.text, msg, PM_MESSAGE_SIZE);
     }
 
     //cout << "msg " << msg << endl;
@@ -114,42 +91,45 @@ int ProcMsgUDP::send(long type, char *msg, int msg_size) {
     //printf("type = %x\n", type);
     //cout << "msg_size " << msg_size << endl;
 
-    if (this->type == PROC_MSG_TYPE_SERVER) {
-        return sendto(this->sd, &_pmsg, sizeof (_pmsg), 0, (struct sockaddr *) &this->slave_isa, sizeof (this->slave_isa));
+    if (this->type == PM_TYPE_SERVER) {
+        return sendto(this->sd, &_pmsg, sizeof (_pmsg), 0, (struct sockaddr *) &this->client_isa, sizeof (this->client_isa));
     } else {
-        return sendto(this->sd, &_pmsg, sizeof (_pmsg), 0, (struct sockaddr *) &this->master_isa, sizeof (this->master_isa));
+        puts(_pmsg.text);
+        return sendto(this->sd, &_pmsg, sizeof (_pmsg), 0, (struct sockaddr *) &this->server_isa, sizeof (this->server_isa));
     }
 
+    return -1;
 }
 
-char *ProcMsgUDP::recv(int *msg_type, int *msg_size) {
+char *pm::pm_recv_udp(int *msg_type, int *msg_size) {
     int ret;
 
-    socklen_t addr_len = sizeof (this->slave_isa);
+    socklen_t addr_len = sizeof (this->client_isa);
 
-    if (this->type == PROC_MSG_TYPE_SERVER) {
-        ret = recvfrom(this->sd, &this->pmsg, sizeof (this->pmsg), 0, (struct sockaddr *) &this->slave_isa, (socklen_t *) & addr_len);
+    if (this->type == PM_TYPE_SERVER) {
+        ret = recvfrom(this->sd, &this->pmsg, sizeof (this->pmsg), 0, (struct sockaddr *) &this->client_isa, (socklen_t *) &addr_len);
     } else {
-        ret = recvfrom(this->sd, &this->pmsg, sizeof (this->pmsg), 0, (struct sockaddr *) &this->master_isa, (socklen_t *) & addr_len);
+        ret = recvfrom(this->sd, &this->pmsg, sizeof (this->pmsg), 0, (struct sockaddr *) &this->server_isa, (socklen_t *) &addr_len);
     }
-
 
     if (ret <= 0) {
         return NULL;
     }
 
+    /*
     if (time(NULL) - this->pmsg.time_send > 1) {
+        printf("time(NULL) - this->pmsg.time_send\n");
         return NULL;
     }
-
+    */
     *msg_size = ret;
     *msg_type = this->pmsg.type;
 
     return &this->pmsg.text[0];
 }
 
-void ProcMsgUDP::close() {
-    ::close(this->sd);
+void pm::pm_close_udp() {
+    close(this->sd);
 }
 
 /*
@@ -164,10 +144,10 @@ int main() {
 
     sleep(2);
     puts("handler_start");
-    Pmsg_s.handler_start(PROC_MSG_DATA_CLIENT_JSON);
+    Pmsg_s.handler_start(PM_DATA_CLIENT_JSON);
     sleep(3);
 
-    cout << "send: " << Pmsg_c.send(PROC_MSG_DATA_CLIENT_STR, (char *) "Hello world", strlen((char *) "Hello world")) << endl;
+    cout << "send: " << Pmsg_c.send(PM_DATA_CLIENT_STR, (char *) "Hello world", strlen((char *) "Hello world")) << endl;
     perror("send");
 
     puts("sleep 5");

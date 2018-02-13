@@ -22,17 +22,24 @@ bool pm::pm_create_zmq(char *addr) { // "tcp://127.0.0.1:5555"
             break;
         }
 
-        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_REP);
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_ROUTER);
         if (this->zmq_responder == NULL) {
             break;
         }
-
+        
         if (zmq_bind(this->zmq_responder, addr) != 0) {
+            break;
+        }
+        
+        int timeout = 10000;
+        if(zmq_setsockopt(this->zmq_responder, ZMQ_RCVTIMEO, &timeout, sizeof (int)) != 0) {
             break;
         }
         
         return true;
     } while (0);
+    
+    //puts(zmq_strerror(errno));
     
     return false;
 }
@@ -44,7 +51,7 @@ bool pm::pm_connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
             break;
         }
 
-        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_REQ);
+        this->zmq_responder = zmq_socket(this->zmq_context, ZMQ_DEALER);
         if (this->zmq_responder == NULL) {
             break;
         }
@@ -53,8 +60,15 @@ bool pm::pm_connect_zmq(char *addr) { // "tcp://127.0.0.1:5555"
             break;
         }
         
+        int timeout = 10000;
+        if(zmq_setsockopt(this->zmq_responder, ZMQ_RCVTIMEO, &timeout, sizeof (int)) != 0) {
+            break;
+        }
+        
         return true;
     } while (0);
+    
+    //puts(zmq_strerror(errno));
     
     return false;
 }
@@ -71,6 +85,8 @@ int pm::pm_send_zmq(long type, char *msg) {
 int pm::pm_send_zmq(long type, char *msg, int msg_size) {
     proc_msg_s _pmsg;
 
+    _pmsg.time_send = time(NULL);
+    
     _pmsg.type = type;
     memset(_pmsg.text, 0, PM_MESSAGE_SIZE); // Заполняем строку нулями.
     if (msg_size <= PM_MESSAGE_SIZE) {
@@ -84,13 +100,13 @@ int pm::pm_send_zmq(long type, char *msg, int msg_size) {
 
 char *pm::pm_recv_zmq(int *msg_type, int *msg_size) {
     int ret = zmq_recv(this->zmq_responder, &this->pmsg, sizeof (this->pmsg), 0);
-    if (ret < 0) {
+    if (ret <= 0) {
         return NULL;
     }
 
-    if (time(NULL) - this->pmsg.time_send > 1) {
-        return NULL;
-    }
+    //if (time(NULL) - this->pmsg.time_send > 1) {
+    //    return NULL;
+    //}
 
     *msg_size = ret;
     *msg_type = this->pmsg.type;

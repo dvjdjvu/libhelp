@@ -18,7 +18,11 @@
 #include <sys/ipc.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <zmq.h>
 
@@ -44,6 +48,7 @@ using namespace std;
 
 #define PM_QUEUE "queue"
 #define PM_ZMQ  "zmq"
+#define PM_UDP  "udp"
 
 class pm {
 public:
@@ -149,6 +154,8 @@ public:
      */
     void pm_handler_wait();
     
+    void pm_answer_get();
+    
     /**
      * @brief Обработка входящего сообщения.
      * @param type Тип сообщение (@ref PM_DATA_JSON @ref PM_DATA_STR @ref PM_DATA_ARRAY)
@@ -218,6 +225,28 @@ private:
     char *pm_recv_zmq(int *msg_type, int *msg_size);
     void pm_close_zmq();
     
+    /*
+     * UDP
+     */
+    bool pm_connect_udp(char *ip, int port);
+    bool pm_create_udp(char *ip, int port);
+    int pm_send_udp(long type, char *msg, int msg_size);
+    int pm_send_udp(long type, char *msg);
+    char *pm_recv_udp(int *msg_type, int *msg_size);
+    void pm_close_udp();
+    
+    // Структура сервера.
+    struct sockaddr_in server_isa;
+    // Структура клиента.
+    struct sockaddr_in client_isa;
+    struct sockaddr_in client_server_isa;
+    
+    
+    // Дескриптор сокета.
+    int sd = 0;
+    int sd_s = 0;
+    int sd_c = 0;
+    int sd_c_s = 0;
     
 };
 

@@ -16,15 +16,20 @@ void pm::pm_perror(const char *s) {
 }
 
 void pm::pm_handler() {
+    while (1) {
+        this->pm_answer_get();
+    }
+}
+
+void pm::pm_answer_get() {
     int size = 0;
     int type = 0;
     char *data = NULL;
-    while (1) {
-        size = 0;
-        type = 0;
-        data = this->pm_recv(&type, &size);
-        this->pm_handler_parser(type, data, size);
-    }
+    
+    data = this->pm_recv(&type, &size);
+    this->pm_handler_parser(type, data, size);
+    
+    return;
 }
 
 void pm::pm_handler_start(long _msgtype_get) {
@@ -42,11 +47,11 @@ void pm::pm_handler_wait() {
 
 bool pm::pm_init(char *comm_type) {
     this->comm_type = comm_type;
-    
-    if (this->comm_type != PM_QUEUE || this->comm_type != PM_ZMQ) {
+
+    if (this->comm_type != PM_QUEUE || this->comm_type != PM_ZMQ || this->comm_type != PM_UDP) {
         return false;
     }
-    
+
     return true;
 }
 
@@ -59,8 +64,10 @@ bool pm::pm_connect(char *addr) {
 bool pm::pm_connect(char *name, int proj_id) {
     if (this->comm_type == PM_QUEUE) {
         return this->pm_connect_queue(name, proj_id);
+    } else if (this->comm_type == PM_UDP) {
+        return this->pm_connect_udp(name, proj_id);
     }
-    
+
     return false;
 }
 
@@ -68,15 +75,17 @@ bool pm::pm_create(char *addr) {
     if (this->comm_type == PM_ZMQ) {
         return this->pm_create_zmq(addr);
     }
-    
+
     return false;
 }
 
 bool pm::pm_create(char *name, int proj_id) {
     if (this->comm_type == PM_QUEUE) {
         return this->pm_create_queue(name, proj_id);
+    } else if (this->comm_type == PM_UDP) {
+        return this->pm_create_udp(name, proj_id);
     }
-    
+
     return false;
 }
 
@@ -85,12 +94,14 @@ void pm::pm_close() {
         this->pm_close_queue();
     } else if (this->comm_type == PM_ZMQ) {
         this->pm_close_zmq();
+    } else if (this->comm_type == PM_UDP) {
+        this->pm_close_udp();
     }
-    
+
     return;
 }
 
-int pm::pm_send(long type, char *msg) {    
+int pm::pm_send(long type, char *msg) {
     return this->pm_send(type, msg, strlen(msg));
 }
 
@@ -99,8 +110,10 @@ int pm::pm_send(long type, char *msg, int msg_size) {
         return this->pm_send_queue(type, msg, msg_size);
     } else if (this->comm_type == PM_ZMQ) {
         return this->pm_send_zmq(type, msg, msg_size);
+    } else if (this->comm_type == PM_UDP) {
+        return this->pm_send_udp(type, msg, msg_size);
     }
-    
+
     return -2;
 }
 
@@ -109,8 +122,10 @@ char *pm::pm_recv(int *msg_type, int *msg_size) {
         return this->pm_recv_queue(msg_type, msg_size);
     } else if (this->comm_type == PM_ZMQ) {
         return this->pm_recv_zmq(msg_type, msg_size);
+    } else if (this->comm_type == PM_UDP) {
+        return this->pm_recv_udp(msg_type, msg_size);
     }
-    
+
     return NULL;
 }
 
@@ -144,4 +159,4 @@ int main() {
     
     return 0;
 }
-*/
+ */

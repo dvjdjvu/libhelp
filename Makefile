@@ -43,7 +43,8 @@ OBJS = $(BUILD)/config.o \
 	    $(BUILD)/lockrun.o \
 	    $(BUILD)/proc_msg.pp.o \
 	    $(BUILD)/proc_msg_zmq.pp.o \
-	    $(BUILD)/proc_msg_queue.pp.o
+	    $(BUILD)/proc_msg_udp.pp.o \
+	    $(BUILD)/proc_msg_queue.pp.o 
 	
 OBJSCC = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
@@ -55,6 +56,7 @@ OBJSLOCK = $(BUILD)/lockrun.o
 	
 OBJSPP = $(BUILD)/proc_msg.pp.o \
 	    $(BUILD)/proc_msg_zmq.pp.o \
+	    $(BUILD)/proc_msg_udp.pp.o \
 	    $(BUILD)/proc_msg_queue.pp.o
 
 BINS = $(BUILD)/libhelp.so \
@@ -103,6 +105,10 @@ $(BUILD)/proc_msg.pp.o: $(DEPS) $(DEPSPP) \
 $(BUILD)/proc_msg_zmq.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg_zmq.cpp
 	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_zmq.pp.o $(SRC)/proc_msg_zmq.cpp
+	
+$(BUILD)/proc_msg_udp.pp.o: $(DEPS) $(DEPSPP) \
+	$(SRC)/proc_msg_udp.cpp
+	$(PP) -c $(CFLAGS) $(PFLAGS) -fPIC $(INCS) -o $(BUILD)/proc_msg_udp.pp.o $(SRC)/proc_msg_udp.cpp
 
 $(BUILD)/proc_msg_queue.pp.o: $(DEPS) $(DEPSPP) \
 	$(SRC)/proc_msg_queue.cpp

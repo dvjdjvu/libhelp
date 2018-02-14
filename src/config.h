@@ -20,16 +20,19 @@ struct config_s
     
     char *src;
     int line_error;
+    
+    char *conf;
 };
 
 config_t       *config_new(log_t *log, char *file, int *line_error);
+config_t       *config_new2(log_t *log, char *str, int *line_error);
 char           *config_get_str(config_t *config, char *key, char *def);
 int             config_get_int(config_t *config, char *key, int def);
 int             config_get_hex(config_t *config, char *key, int def);
 unsigned int    config_get_uint(config_t *config, char *key, unsigned int def);
 int             config_get_bool(config_t *config, char *key, int def);
 void            config_delete(config_t *config);
-char           *config_get_file(config_t *config);
+char           *config_get_conf(config_t *config);
 
 #ifdef	__cplusplus
 }

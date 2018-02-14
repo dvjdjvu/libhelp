@@ -36,15 +36,17 @@ using namespace std;
 #define PM_TYPE_SERVER 0x0010
 #define PM_TYPE_CLIENT 0x0011
 
-#define PM_MESSAGE_SIZE 1024
+#define PM_MESSAGE_SIZE 10000
 
 #define PM_DATA_SERVER_JSON     0x1000
 #define PM_DATA_SERVER_STR      0x1001
 #define PM_DATA_SERVER_ARRAY    0x1002
+#define PM_DATA_SERVER_CONF     0x1003
 
 #define PM_DATA_CLIENT_JSON     0x2000
 #define PM_DATA_CLIENT_STR      0x2001
 #define PM_DATA_CLIENT_ARRAY    0x2002
+#define PM_DATA_CLIENT_CONF     0x2003
 
 #define PM_QUEUE "queue"
 #define PM_ZMQ  "zmq"
@@ -215,6 +217,7 @@ private:
     void pm_close_queue();
     
     // zmq
+    /*
     void *zmq_context;
     void *zmq_responder;
     
@@ -224,7 +227,7 @@ private:
     int pm_send_zmq(long type, char *msg);
     char *pm_recv_zmq(int *msg_type, int *msg_size);
     void pm_close_zmq();
-    
+    */
     /*
      * UDP
      */

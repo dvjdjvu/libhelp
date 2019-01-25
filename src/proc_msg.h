@@ -24,7 +24,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include <zmq.h>
+//#include <zmq.h>
 
 #include <thread>
 #include <mutex>

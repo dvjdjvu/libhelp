@@ -26,6 +26,8 @@ struct config_s
 
 config_t       *config_new(log_t *log, char *file, int *line_error);
 config_t       *config_new2(log_t *log, char *str, int *line_error);
+int            *config_test(log_t *log, char *str, int *size);
+
 char           *config_get_str(config_t *config, char *key, char *def);
 int             config_get_int(config_t *config, char *key, int def);
 int             config_get_hex(config_t *config, char *key, int def);

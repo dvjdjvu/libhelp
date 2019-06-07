@@ -33,12 +33,12 @@ semaphore_t *semaphore_open(char *semaphore_name);
 /**
   * @brief Освободить семафор.
   */
-void semaphore_unlock(semaphore_t *semap);
+void semaphore_post(semaphore_t *semap);
 
 /**
   * @brief Захватить семафор.
   */
-void semaphore_lock(semaphore_t *semap);
+void semaphore_wait(semaphore_t *semap);
 
 /**
   * @brief Закрыть семафор.

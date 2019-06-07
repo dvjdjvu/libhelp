@@ -14,7 +14,7 @@ semaphore_create(char *semaphore_name) {
 
     fd = open(semaphore_name, O_RDWR | O_CREAT | O_EXCL, 0666);
     if (fd < 0) {
-        return (NULL);
+        return NULL;
     }
     
     (void) ftruncate(fd, sizeof(semaphore_t));
@@ -50,7 +50,7 @@ semaphore_open(char *semaphore_name) {
 }
 
 void
-semaphore_post(semaphore_t *semap) {
+semaphore_unlock(semaphore_t *semap) {
     pthread_mutex_lock(&semap->lock);
     
     if (semap->count == 0) {
@@ -62,7 +62,7 @@ semaphore_post(semaphore_t *semap) {
 }
 
 void
-semaphore_wait(semaphore_t *semap) {
+semaphore_lock(semaphore_t *semap) {
     pthread_mutex_lock(&semap->lock);
     
     while (semap->count == 0) {
@@ -97,7 +97,7 @@ main()
     return (0);
 }
 
-// post
+// unlock
 #include "pthread.h"
 #include "semaphore.h"
 
@@ -109,12 +109,12 @@ main()
     semap = semaphore_open("/tmp/semaphore");
     if (semap == NULL)
         exit(1);
-    semaphore_post(semap);
+    semaphore_unlock(semap);
     semaphore_close(semap);
     return (0);
 }
 
-// wait
+// lock
 #include "pthread.h"
 #include "semaphore.h"
 
@@ -126,7 +126,7 @@ main()
     semap = semaphore_open("/tmp/semaphore");
     if (semap == NULL)
         exit(1);
-    semaphore_wait(semap);
+    semaphore_lock(semap);
     semaphore_close(semap);
     return (0);
 } 

@@ -31,12 +31,12 @@ semaphore_t *semaphore_create(char *semaphore_name);
 semaphore_t *semaphore_open(char *semaphore_name);
 
 /**
-  * @brief Освобождаем семафор.
+  * @brief Освободить семафор.
   */
 void semaphore_post(semaphore_t *semap);
 
 /**
-  * @brief Захватываем семафор.
+  * @brief Захватить семафор.
   */
 void semaphore_wait(semaphore_t *semap);
 

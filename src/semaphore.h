@@ -21,7 +21,7 @@ extern "C" {
 typedef struct semaphore semaphore_t;
 
 /**
-  * @brief Создать семафор.
+  * @brief Создать семафор. По умолчанию он закрыт.
   */
 semaphore_t *semaphore_create(char *semaphore_name);
 

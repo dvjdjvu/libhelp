@@ -31,7 +31,8 @@ DEPS = $(SRC)/config.h \
 	$(SRC)/pool.h \
 	$(SRC)/str.h \
 	$(SRC)/proc.h \
-	$(SRC)/file.h 
+	$(SRC)/file.h \
+	$(SRC)/semaphore.h 
 
 DEPSPP = $(SRC)/proc_msg.h 
 
@@ -40,6 +41,7 @@ OBJS = $(BUILD)/config.o \
 	    $(BUILD)/pool.o \
 	    $(BUILD)/proc.o \
 	    $(BUILD)/file.o \
+	    $(BUILD)/semaphore.o \
 	    $(BUILD)/lockrun.o \
 	    $(BUILD)/proc_msg.pp.o \
 	    $(BUILD)/proc_msg_udp.pp.o \
@@ -50,7 +52,8 @@ OBJSCC = $(BUILD)/config.o \
 	    $(BUILD)/logger.o \
 	    $(BUILD)/pool.o \
 	    $(BUILD)/proc.o \
-	    $(BUILD)/file.o 
+	    $(BUILD)/file.o \
+	    $(BUILD)/semaphore.o
 
 OBJSLOCK = $(BUILD)/lockrun.o
 	
@@ -94,6 +97,10 @@ $(BUILD)/proc.o: $(DEPS) \
 $(BUILD)/file.o: $(DEPS) \
 	$(SRC)/file.c
 	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/file.o $(SRC)/file.c
+
+$(BUILD)/semaphore.o: $(DEPS) \
+	$(SRC)/semaphore.c
+	$(CC) -c $(CFLAGS) -fPIC $(INCS) -o $(BUILD)/semaphore.o $(SRC)/semaphore.c
 	
 $(BUILD)/lockrun.o: $(DEPS) \
 	$(SRC)/lockrun.c

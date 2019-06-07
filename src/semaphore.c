@@ -50,7 +50,7 @@ semaphore_open(char *semaphore_name) {
 }
 
 void
-semaphore_unlock(semaphore_t *semap) {
+semaphore_post(semaphore_t *semap) {
     pthread_mutex_lock(&semap->lock);
     
     if (semap->count == 0) {
@@ -62,7 +62,7 @@ semaphore_unlock(semaphore_t *semap) {
 }
 
 void
-semaphore_lock(semaphore_t *semap) {
+semaphore_wait(semaphore_t *semap) {
     pthread_mutex_lock(&semap->lock);
     
     while (semap->count == 0) {
@@ -97,7 +97,7 @@ main()
     return (0);
 }
 
-// unlock
+// post
 #include "pthread.h"
 #include "semaphore.h"
 
@@ -109,12 +109,12 @@ main()
     semap = semaphore_open("/tmp/semaphore");
     if (semap == NULL)
         exit(1);
-    semaphore_unlock(semap);
+    semaphore_post(semap);
     semaphore_close(semap);
     return (0);
 }
 
-// lock
+// wait
 #include "pthread.h"
 #include "semaphore.h"
 
@@ -126,7 +126,7 @@ main()
     semap = semaphore_open("/tmp/semaphore");
     if (semap == NULL)
         exit(1);
-    semaphore_lock(semap);
+    semaphore_wait(semap);
     semaphore_close(semap);
     return (0);
 } 
